@@ -1,0 +1,16 @@
+services:
+  sync:
+    build:
+      context: ./server
+    environment:
+      DATA_PATH: /data
+      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY to a long random value before starting Compose}
+      REGISTRATION_KEY: ${REGISTRATION_KEY-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD-}
+      ADMIN_RESET_PASSWORD: ${ADMIN_RESET_PASSWORD-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-app://obsidian.md}
+    volumes:
+      - ./data:/data
+    ports:
+      - "8080:8080"

@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ObsidianSync.Server (admin port 5105)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Obsync: build server",
+      "program": "${workspaceFolder}/server/src/ObsidianSync.Server/bin/Debug/net10.0/ObsidianSync.Server.dll",
+      "cwd": "${workspaceFolder}/server/src/ObsidianSync.Server",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5105"
+      },
+      "serverReadyAction": {
+        "pattern": "Now listening on: (https?://\\S+)",
+        "uriFormat": "%s/admin/",
+        "action": "openExternally"
+      }
+    }
+  ]
+}

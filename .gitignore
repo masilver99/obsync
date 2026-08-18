@@ -1,0 +1,24 @@
+# .NET
+**/bin/
+**/obj/
+*.user
+*.suo
+
+# Local service data
+data/
+server/data/
+.env
+!.env.example
+
+# Node / Obsidian build output
+plugin/node_modules/
+plugin/main.js
+plugin/main.js.map
+plugin/.hotreload/
+
+# Test and editor output
+TestResults/
+output/
+.vs/
+.idea/
+*.log

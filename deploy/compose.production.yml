@@ -1,0 +1,16 @@
+services:
+  sync:
+    image: ${OBSYNC_IMAGE:?Set OBSYNC_IMAGE to the full GHCR image reference}
+    restart: unless-stopped
+    environment:
+      DATA_PATH: /data
+      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in the deployment .env}
+      REGISTRATION_KEY: ${REGISTRATION_KEY-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD-}
+      ADMIN_RESET_PASSWORD: ${ADMIN_RESET_PASSWORD-false}
+      CORS_ORIGINS: ${CORS_ORIGINS:-app://obsidian.md}
+    volumes:
+      - ${OBSYNC_DATA_PATH:-./data}:/data
+    ports:
+      - "${OBSYNC_BIND_ADDRESS:-127.0.0.1}:8080:8080"

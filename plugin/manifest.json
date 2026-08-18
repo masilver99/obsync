@@ -1,0 +1,9 @@
+{
+  "id": "obsync",
+  "name": "Obsidian Vault Sync",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Synchronize an Obsidian vault with a self-hosted Obsync server.",
+  "author": "Obsync contributors",
+  "isDesktopOnly": false
+}

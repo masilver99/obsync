@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/server/" />
+  <Folder Name="/server/src/">
+    <Project Path="server/src/ObsidianSync.Server/ObsidianSync.Server.csproj" />
+  </Folder>
+  <Folder Name="/server/tests/">
+    <Project Path="server/tests/ObsidianSync.Server.Tests/ObsidianSync.Server.Tests.csproj" />
+  </Folder>
+</Solution>

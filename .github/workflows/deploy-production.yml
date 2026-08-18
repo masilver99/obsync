@@ -1,0 +1,81 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 40-character commit SHA for an image already published by CI
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy selected image
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+      IMAGE_TAG: ${{ inputs.image_tag }}
+      IMAGE_NAME: ghcr.io/masilver99/obsync
+    steps:
+      - name: Validate deployment inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]] || {
+            echo "image_tag must be a 40-character lowercase commit SHA" >&2
+            exit 1
+          }
+          : "${DEPLOY_HOST:?Set DEPLOY_HOST in the production environment}"
+          : "${DEPLOY_USER:?Set DEPLOY_USER in the production environment}"
+          : "${DEPLOY_SSH_KEY:?Set DEPLOY_SSH_KEY in the production environment}"
+          : "${DEPLOY_KNOWN_HOSTS:?Set DEPLOY_KNOWN_HOSTS in the production environment}"
+
+      - name: Prepare SSH credentials
+        id: ssh
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          umask 077
+          key_path="$RUNNER_TEMP/obsync-deploy-key"
+          known_hosts_path="$RUNNER_TEMP/obsync-known-hosts"
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$key_path"
+          printf '%s\n' "$KNOWN_HOSTS" > "$known_hosts_path"
+          test -s "$key_path"
+          test -s "$known_hosts_path"
+          echo "key_path=$key_path" >> "$GITHUB_OUTPUT"
+          echo "known_hosts_path=$known_hosts_path" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy and verify health
+        shell: bash
+        env:
+          SSH_KEY_PATH: ${{ steps.ssh.outputs.key_path }}
+          KNOWN_HOSTS_PATH: ${{ steps.ssh.outputs.known_hosts_path }}
+        run: |
+          set -euo pipefail
+          deploy_path="${DEPLOY_PATH:-/opt/obsync}"
+          image_ref="$IMAGE_NAME:$IMAGE_TAG"
+          printf -v remote_command 'cd -- %q && ./deploy.sh %q' "$deploy_path" "$image_ref"
+          ssh \
+            -i "$SSH_KEY_PATH" \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$KNOWN_HOSTS_PATH" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "$remote_command"

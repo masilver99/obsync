@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Obsync administration</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+  <main class="page-shell">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Obsync</p>
+        <h1>Administration</h1>
+        <p class="lede">Users, vault access, synchronization activity, and storage.</p>
+      </div>
+      <button id="refresh-button" class="secondary" type="button" hidden>Refresh</button>
+    </header>
+
+    <div id="message" class="message" role="status" aria-live="polite"></div>
+
+    <section id="login-panel" class="panel login-panel" aria-labelledby="login-heading">
+      <p class="eyebrow">Protected dashboard</p>
+      <h2 id="login-heading">Sign in as an administrator</h2>
+      <p class="muted">The dashboard keeps its bearer token in memory and clears it when this page is closed.</p>
+      <form id="login-form" class="form-grid compact-form">
+        <label>Username<input id="login-username" name="username" autocomplete="username" required></label>
+        <label>Password<input id="login-password" name="password" type="password" autocomplete="current-password" required></label>
+        <button class="primary" type="submit">Sign in</button>
+      </form>
+    </section>
+
+    <section id="dashboard" hidden>
+      <div id="overview-cards" class="card-grid"></div>
+
+      <div class="two-column">
+        <section class="panel" aria-labelledby="users-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Accounts</p>
+              <h2 id="users-heading">Users</h2>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Role</th><th>Vaults</th><th>Last seen</th></tr></thead>
+              <tbody id="users-table"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="vaults-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Whole-vault access</p>
+              <h2 id="vaults-heading">Vaults</h2>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Vault</th><th>Owner</th><th>Files</th><th>Revision</th><th>Last sync</th></tr></thead>
+              <tbody id="vaults-table"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <div class="two-column action-grid">
+        <section class="panel" aria-labelledby="create-user-heading">
+          <p class="eyebrow">User management</p>
+          <h2 id="create-user-heading">Create a user</h2>
+          <form id="create-user-form" class="form-grid">
+            <label>Username<input id="new-username" required autocomplete="off"></label>
+            <label>Password<input id="new-password" type="password" required autocomplete="new-password"></label>
+            <label class="checkbox-label"><input id="new-is-admin" type="checkbox"> Administrator</label>
+            <button class="primary" type="submit">Create user</button>
+          </form>
+        </section>
+
+        <section class="panel" aria-labelledby="reset-password-heading">
+          <p class="eyebrow">User management</p>
+          <h2 id="reset-password-heading">Set a password</h2>
+          <form id="reset-password-form" class="form-grid">
+            <label>User<select id="password-user" required></select></label>
+            <label>New password<input id="reset-password" type="password" required autocomplete="new-password"></label>
+            <button class="primary" type="submit">Set password</button>
+          </form>
+        </section>
+
+        <section class="panel" aria-labelledby="membership-heading">
+          <p class="eyebrow">Vault management</p>
+          <h2 id="membership-heading">Assign vault access</h2>
+          <form id="membership-form" class="form-grid">
+            <label>Vault<select id="membership-vault" required></select></label>
+            <label>Username<input id="membership-username" required autocomplete="off"></label>
+            <label>Role<select id="membership-role"><option value="Editor">Editor</option><option value="ReadOnly">Read only</option></select></label>
+            <button class="primary" type="submit">Save access</button>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script src="./admin.js"></script>
+</body>
+</html>
