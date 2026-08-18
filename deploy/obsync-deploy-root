@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+if [[ $# -ne 1 || ! "$1" =~ ^ghcr\.io/masilver99/obsync:[0-9a-f]{40}$ ]]; then
+  echo "Invalid immutable obsync image reference." >&2
+  exit 64
+fi
+
+exec /opt/obsync/deploy.sh "$1"

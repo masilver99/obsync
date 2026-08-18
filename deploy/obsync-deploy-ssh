@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+original_command="${SSH_ORIGINAL_COMMAND:-}"
+if [[ "$original_command" =~ ^deploy\ (ghcr\.io/masilver99/obsync:[0-9a-f]{40})$ ]]; then
+  image_ref="${BASH_REMATCH[1]}"
+else
+  echo "Only an immutable obsync deployment command is permitted." >&2
+  exit 64
+fi
+
+exec sudo -n /usr/local/sbin/obsync-deploy-root "$image_ref"

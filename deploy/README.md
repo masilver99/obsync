@@ -4,18 +4,23 @@ The repository publishes immutable server images to GHCR from the `main` branch 
 
 ## One-time server setup
 
-Create a deployment directory on the Linux host, copy `compose.production.yml` and `deploy.sh` into it, and make the script executable:
+Create a root-owned deployment directory on the Linux host, copy `compose.production.yml` and `deploy.sh` into it, and make the script executable. The SSH deployment account should not be placed in the `docker` group: access to the Docker socket is effectively root access. Instead, install `obsync-deploy-ssh`, `obsync-deploy-root`, and `obsync-deploy-sudoers` from this directory, and authorize its key with a forced command:
 
 ```bash
 sudo mkdir -p /opt/obsync
-sudo chown "$USER":"$USER" /opt/obsync
-cp deploy/compose.production.yml deploy/deploy.sh /opt/obsync/
-chmod 700 /opt/obsync/deploy.sh
+sudo install -o root -g root -m 700 deploy/compose.production.yml /opt/obsync/compose.production.yml
+sudo install -o root -g root -m 700 deploy/deploy.sh /opt/obsync/deploy.sh
+sudo install -o root -g root -m 755 deploy/obsync-deploy-ssh /usr/local/sbin/obsync-deploy-ssh
+sudo install -o root -g root -m 755 deploy/obsync-deploy-root /usr/local/sbin/obsync-deploy-root
+sudo install -o root -g root -m 440 deploy/obsync-deploy-sudoers /etc/sudoers.d/obsync-deploy
+sudo visudo -cf /etc/sudoers.d/obsync-deploy
 ```
+
+Create a system user with no password and a root-owned `authorized_keys` file. The key entry should include `command="/usr/local/sbin/obsync-deploy-ssh",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty,no-user-rc`. The account has no interactive shell through that key and can invoke only the validated deployment wrapper.
 
 Create `/opt/obsync/.env` from the repository `.env.example`. Set a long random `JWT_SIGNING_KEY`, the intended administrator credentials, and any required `CORS_ORIGINS`. Keep `REGISTRATION_KEY` set only while creating invited accounts, then remove it and restart the service. Never commit this file or the `/opt/obsync/data` directory.
 
-The deployment user needs access to Docker and the deployment directory. Use a dedicated SSH key for this account and restrict the key and account as appropriate for the host. The deployment script does not need repository write access.
+The deployment user does not need direct Docker access or repository write access. Keep `/opt/obsync/.env` root-owned and mode `0600`; the root wrapper reads it through `deploy.sh`.
 
 If the GHCR package is private, authenticate the server's Docker client to `ghcr.io` with a read-only package token before the first deployment. A public image is also reasonable for this public-source project because the image contains no runtime data or secrets.
 
@@ -28,11 +33,7 @@ Create an environment named `production`, require a reviewer, and restrict it to
 - `DEPLOY_SSH_KEY`: its private SSH key.
 - `DEPLOY_KNOWN_HOSTS`: the exact, reviewed `known_hosts` line for the server.
 
-Add this environment variable:
-
-- `DEPLOY_PATH`: normally `/opt/obsync`.
-
-The workflow never receives the application JWT key, administrator password, registration key, SQLite database, or vault objects.
+The server wrapper fixes the deployment directory at `/opt/obsync`. The workflow never receives the application JWT key, administrator password, registration key, SQLite database, or vault objects.
 
 ## Backups and rollback
 

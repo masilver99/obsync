@@ -26,7 +26,6 @@ jobs:
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
       DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
       DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
-      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
       IMAGE_TAG: ${{ inputs.image_tag }}
       IMAGE_NAME: ghcr.io/masilver99/obsync
     steps:
@@ -68,9 +67,8 @@ jobs:
           KNOWN_HOSTS_PATH: ${{ steps.ssh.outputs.known_hosts_path }}
         run: |
           set -euo pipefail
-          deploy_path="${DEPLOY_PATH:-/opt/obsync}"
           image_ref="$IMAGE_NAME:$IMAGE_TAG"
-          printf -v remote_command 'cd -- %q && ./deploy.sh %q' "$deploy_path" "$image_ref"
+          printf -v remote_command 'deploy %q' "$image_ref"
           ssh \
             -i "$SSH_KEY_PATH" \
             -o BatchMode=yes \
