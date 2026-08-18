@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+if [ "${1:-}" != "obsync-deploy" ]; then
+  exit 1
+fi
+
+exec /usr/bin/cat /etc/ssh/authorized_keys/obsync-deploy

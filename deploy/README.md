@@ -4,19 +4,20 @@ The repository publishes immutable server images to GHCR from the `main` branch 
 
 ## One-time server setup
 
-Create a root-owned deployment directory on the Linux host, copy `compose.production.yml` and `deploy.sh` into it, and make the script executable. The SSH deployment account should not be placed in the `docker` group: access to the Docker socket is effectively root access. Instead, install `obsync-deploy-ssh`, `obsync-deploy-root`, and `obsync-deploy-sudoers` from this directory, and authorize its key with a forced command:
+Create a root-owned deployment directory on the Linux host, copy `compose.production.yml` and `deploy.sh` into it, and make the script executable. The SSH deployment account should not be placed in the `docker` group: access to the Docker socket is effectively root access. Instead, install `obsync-authorized-keys`, `obsync-deploy-ssh`, `obsync-deploy-root`, and `obsync-deploy-sudoers` from this directory, and authorize its key with a forced command:
 
 ```bash
 sudo mkdir -p /opt/obsync
 sudo install -o root -g root -m 700 deploy/compose.production.yml /opt/obsync/compose.production.yml
 sudo install -o root -g root -m 700 deploy/deploy.sh /opt/obsync/deploy.sh
+sudo install -o root -g root -m 755 deploy/obsync-authorized-keys /usr/local/sbin/obsync-authorized-keys
 sudo install -o root -g root -m 755 deploy/obsync-deploy-ssh /usr/local/sbin/obsync-deploy-ssh
 sudo install -o root -g root -m 755 deploy/obsync-deploy-root /usr/local/sbin/obsync-deploy-root
 sudo install -o root -g root -m 440 deploy/obsync-deploy-sudoers /etc/sudoers.d/obsync-deploy
 sudo visudo -cf /etc/sudoers.d/obsync-deploy
 ```
 
-Create a system user with no password and a root-owned `authorized_keys` file. The key entry should include `command="/usr/local/sbin/obsync-deploy-ssh",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty,no-user-rc`. The account has no interactive shell through that key and can invoke only the validated deployment wrapper.
+Create a system user with no password and a root-owned key file under `/etc/ssh/authorized_keys`. Configure `AuthorizedKeysCommand /usr/local/sbin/obsync-authorized-keys %u` for this user. The key entry should include `command="/usr/local/sbin/obsync-deploy-ssh",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty,no-user-rc`. The account has no interactive shell through that key and can invoke only the validated deployment wrapper.
 
 Create `/opt/obsync/.env` from the repository `.env.example`. Set a long random `JWT_SIGNING_KEY`, the intended administrator credentials, and any required `CORS_ORIGINS`. Keep `REGISTRATION_KEY` set only while creating invited accounts, then remove it and restart the service. Never commit this file or the `/opt/obsync/data` directory.
 
