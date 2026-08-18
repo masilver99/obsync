@@ -19,7 +19,7 @@ sudo visudo -cf /etc/sudoers.d/obsync-deploy
 
 Create a system user with no password and a root-owned key file under `/etc/ssh/authorized_keys`. Configure `AuthorizedKeysCommand /usr/local/sbin/obsync-authorized-keys %u` for this user. The key entry should include `command="/usr/local/sbin/obsync-deploy-ssh",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty,no-user-rc`. The account has no interactive shell through that key and can invoke only the validated deployment wrapper.
 
-Create `/opt/obsync/.env` from the repository `.env.example`. Set a long random `JWT_SIGNING_KEY`, the intended administrator credentials, and any required `CORS_ORIGINS`. Keep `REGISTRATION_KEY` set only while creating invited accounts, then remove it and restart the service. Never commit this file or the `/opt/obsync/data` directory.
+Create `/opt/obsync/.env` from the repository `.env.example`. Set a long random `JWT_SIGNING_KEY`, the intended administrator credentials, `OBSYNC_DOMAIN`, and the private `OBSYNC_HEALTH_PORT`. The Compose file joins the host's external `net` network for nginx-proxy and sets `VIRTUAL_HOST`, `VIRTUAL_PORT`, and `LETSENCRYPT_HOST`; do not publish the health port publicly. Include the domain in `CORS_ORIGINS`. Keep `REGISTRATION_KEY` set only while creating invited accounts, then remove it and restart the service. Never commit this file or the `/opt/obsync/data` directory.
 
 The deployment user does not need direct Docker access or repository write access. Keep `/opt/obsync/.env` root-owned and mode `0600`; the root wrapper reads it through `deploy.sh`.
 

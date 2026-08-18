@@ -27,7 +27,7 @@ set +a
 
 export OBSYNC_IMAGE="$image_ref"
 backup_path="${OBSYNC_BACKUP_PATH:-$deploy_path/backups}"
-health_url="${OBSYNC_HEALTH_URL:-http://127.0.0.1:8080/health}"
+health_url="${OBSYNC_HEALTH_URL:-http://127.0.0.1:18080/health}"
 mkdir -p "$backup_path"
 
 compose=(docker compose --env-file "$env_file" -f "$compose_file")

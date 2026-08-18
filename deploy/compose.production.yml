@@ -4,13 +4,22 @@ services:
     restart: unless-stopped
     environment:
       DATA_PATH: /data
+      VIRTUAL_HOST: ${OBSYNC_DOMAIN:?Set OBSYNC_DOMAIN in the deployment .env}
+      VIRTUAL_PORT: "8080"
+      LETSENCRYPT_HOST: ${OBSYNC_DOMAIN:?Set OBSYNC_DOMAIN in the deployment .env}
       JWT_SIGNING_KEY: ${JWT_SIGNING_KEY:?Set JWT_SIGNING_KEY in the deployment .env}
       REGISTRATION_KEY: ${REGISTRATION_KEY-}
       ADMIN_USERNAME: ${ADMIN_USERNAME-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD-}
       ADMIN_RESET_PASSWORD: ${ADMIN_RESET_PASSWORD-false}
-      CORS_ORIGINS: ${CORS_ORIGINS:-app://obsidian.md}
+      CORS_ORIGINS: "${CORS_ORIGINS:-app://obsidian.md;https://obsync.shaa.one}"
     volumes:
       - ${OBSYNC_DATA_PATH:-./data}:/data
     ports:
-      - "${OBSYNC_BIND_ADDRESS:-127.0.0.1}:8080:8080"
+      - "127.0.0.1:${OBSYNC_HEALTH_PORT:-18080}:8080"
+    networks:
+      - net
+
+networks:
+  net:
+    external: true
