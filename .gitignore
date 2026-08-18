@@ -5,7 +5,7 @@
 *.suo
 
 # Local service data
-data/
+/data/
 server/data/
 .env
 !.env.example
